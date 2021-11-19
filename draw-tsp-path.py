@@ -8,11 +8,13 @@ from ortools.constraint_solver import pywrapcp
 from PIL import Image, ImageDraw
 import os
 
+from stippling import NUMBER_OF_POINTS
+
 # Change these file names to the relevant files.
-ORIGINAL_IMAGE = "images/smileyface-inverted.png"
-IMAGE_TSP = "images/smileyface-inverted-1024-stipple.tsp"
-#ORIGINAL_IMAGE = "images/logo-ufla-png.png"
-#IMAGE_TSP = "images/logo-ufla-1024-stipple.tsp"
+#ORIGINAL_IMAGE = "images/smileyface-inverted.png"
+#IMAGE_TSP = "images/smileyface-inverted-1024-stipple.tsp"
+ORIGINAL_IMAGE = "images/logo-ufla-png.png"
+IMAGE_TSP = "images/logo-ufla-png-1024-stipple.tsp"
 
 def create_data_model():
     """Stores the data for the problem."""
@@ -45,6 +47,37 @@ def compute_euclidean_distance_matrix(locations):
                     math.hypot((from_node[0] - to_node[0]),
                                (from_node[1] - to_node[1]))))
     return distances
+
+
+
+def dist(pt1, pt2):
+  return math.sqrt((pt1[0] - pt2[0])**2 + (pt1[1]-pt2[1])**2)
+
+# Given a point and a list, returns p \in lst s.t. dist(p, pt) is minimal
+def nearest(pt, lst):
+  best = float('inf')
+  bestInd = -1
+  for i in range(len(lst)):
+    if dist(lst[i], pt) < best:
+      best = dist(lst[i], pt)
+      bestInd = i
+    
+  (lst[0], lst[bestInd]) = (lst[bestInd], lst[0])
+  
+  return (lst[0], lst[1:])
+
+
+def tsp(lst):
+  order = [lst[0]]
+  lst = lst[1:]
+
+  while (len(lst) > 0):
+    last = order[len(order)-1]
+    (near, lst) = nearest(last, lst)
+    order.append(near)
+  
+  return order
+
 
 def print_solution(manager, routing, solution):
     """Prints solution on console."""
@@ -106,7 +139,10 @@ def main():
     # Create Routing Model.
     routing = pywrapcp.RoutingModel(manager)
     print("Step 2/5: Computing distance matrix")
-    distance_matrix = compute_euclidean_distance_matrix(data['locations'])
+    ###############################################################################################################
+    #distance_matrix = compute_euclidean_distance_matrix(data['locations'])
+    #distance_matrix = nearest_neighbors_solution(data['locations'])
+    distance_matrix = tsp(data['locations'])
 
     def distance_callback(from_index, to_index):
         """Returns the distance between the two nodes."""
@@ -138,7 +174,7 @@ def main():
         draw_routes(data['locations'],routes)
     else:
         print("A solution couldn't be found :(")
-    
+ 
 
 if __name__ == '__main__':
     main()

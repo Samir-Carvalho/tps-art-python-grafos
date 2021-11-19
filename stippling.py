@@ -6,8 +6,8 @@ cmd = sys.executable
 
 
 # The filename of the image you want to stipple goes here.
-ORIGINAL_IMAGE = "images/smileyface-inverted.png"
-#ORIGINAL_IMAGE = "images/logo-ufla-png.png"
+#ORIGINAL_IMAGE = "images/smileyface-inverted.png"
+ORIGINAL_IMAGE = "images/logo-ufla-png.png"
 
 
 # Enables saving of images.

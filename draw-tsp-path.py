@@ -3,6 +3,7 @@
 
 from __future__ import print_function
 import math
+
 from ortools.constraint_solver import routing_enums_pb2
 from ortools.constraint_solver import pywrapcp
 from PIL import Image, ImageDraw
@@ -13,8 +14,11 @@ from stippling import NUMBER_OF_POINTS
 # Change these file names to the relevant files.
 #ORIGINAL_IMAGE = "images/smileyface-inverted.png"
 #IMAGE_TSP = "images/smileyface-inverted-1024-stipple.tsp"
+
 ORIGINAL_IMAGE = "images/logo-ufla-png.png"
 IMAGE_TSP = "images/logo-ufla-png-1024-stipple.tsp"
+#IMAGE_TSP = "images/logo-ufla-png-2048-stipple.tsp"
+#IMAGE_TSP = "images/logo-ufla-png-3072-stipple.tsp"
 
 def create_data_model():
     """Stores the data for the problem."""
@@ -44,39 +48,89 @@ def compute_euclidean_distance_matrix(locations):
             else:
                 # Euclidean distance
                 distances[from_counter][to_counter] = (int(
-                    math.hypot((from_node[0] - to_node[0]),
-                               (from_node[1] - to_node[1]))))
+                    math.hypot((from_node[0] - to_node[0]),(from_node[1] - to_node[1]))))
     return distances
 
 
+#(ii) implemente uma heurística construtiva vista em aula(Inserção Mais Próxima, Vizinho Mais Próximo ou Guloso)
+#Implementamos algoritmo de aproximação do vizinho mais proximo
 
+#Calcular a Distancia 
 def dist(pt1, pt2):
-  return math.sqrt((pt1[0] - pt2[0])**2 + (pt1[1]-pt2[1])**2)
+  return math.hypot((pt1[0] - pt2[0]), (pt1[1]-pt2[1]))
 
-# Given a point and a list, returns p \in lst s.t. dist(p, pt) is minimal
-def nearest(pt, lst):
+# Dado um ponto e uma lista, retorna p \ no último s.t. dist(p, pt)
+# Para encontrar o ponto mais próximo
+def maisProximo(pt, lst):
   best = float('inf')
   bestInd = -1
   for i in range(len(lst)):
     if dist(lst[i], pt) < best:
       best = dist(lst[i], pt)
-      bestInd = i
-    
-  (lst[0], lst[bestInd]) = (lst[bestInd], lst[0])
+      bestInd = i 
+    (lst[0], lst[bestInd]) = (lst[bestInd], lst[0])
   
   return (lst[0], lst[1:])
 
-
-def tsp(lst):
+def tspVizinhoMaisProximo(lst):
   order = [lst[0]]
   lst = lst[1:]
 
   while (len(lst) > 0):
     last = order[len(order)-1]
-    (near, lst) = nearest(last, lst)
+    (near, lst) = maisProximo(last, lst)
     order.append(near)
   
   return order
+
+#Fim da implementação(ii)
+##########################################################################
+
+
+##############
+#(iii) Implemente um algoritmo projetado por você
+
+def calculando_distanciaTotal(lst):
+    distTotal = 0
+    arestas = [[lst[i],lst[i+1]] for i in range(len(lst)-1)] + [(lst[-1], lst[0])]
+    for e in arestas:
+        distTotal += dist(e[0],e[1])
+    return distTotal
+
+def melhorandoArota(rota):
+    print("Inicializando funcao.")
+    size = len(rota)
+    print(size)
+    total_dist = calculando_distanciaTotal(rota)
+    print("A distância total atual é {}".format(total_dist))
+    melhorar = 21
+    aux = 1
+    while melhorar > 20:
+        melhorar = 0
+        for i in range(0,size - 2):
+            proximoi = i+1
+            for j in range(i + 2, size):
+                if j == size - 1:
+                    proximoj = 0
+                else:
+                    proximoj = j + 1
+                trocar = dist(rota[i],rota[j]) + dist(rota[proximoi],rota[proximoj]) - dist(rota[i],rota[proximoi]) - dist(rota[j],rota[proximoj])
+                if trocar < 40:
+                    trocar_arestas(proximoi,j+1,rota)
+                    melhorar += -1*trocar
+        total_dist = total_dist + -1*melhorar
+        print("Finalizando {} loop.  A distância total atual é {}.({} reduzido)".format(aux,total_dist,melhorar))
+        aux += 1
+    print("Completando funcao (iii)")
+    return rota
+
+def trocar_arestas(ii,jj,rotas):
+    nova_subrota = rotas[ii:jj]        
+    rotas[ii:jj] = nova_subrota[::-1]
+
+#Fim da implementação(iii)
+#############################################################
+
 
 
 def print_solution(manager, routing, solution):
@@ -139,10 +193,19 @@ def main():
     # Create Routing Model.
     routing = pywrapcp.RoutingModel(manager)
     print("Step 2/5: Computing distance matrix")
-    ###############################################################################################################
+
+    #######################################################################################
+    #(i)
     #distance_matrix = compute_euclidean_distance_matrix(data['locations'])
-    #distance_matrix = nearest_neighbors_solution(data['locations'])
-    distance_matrix = tsp(data['locations'])
+    
+    #(ii)
+    distance_matrix = tspVizinhoMaisProximo(data['locations'])
+    
+    #(iii)
+    #distance_matrix = melhorandoArota(data['locations'])
+
+    #######################################################################################
+
 
     def distance_callback(from_index, to_index):
         """Returns the distance between the two nodes."""

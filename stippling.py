@@ -14,9 +14,9 @@ ORIGINAL_IMAGE = "images/logo-ufla-png.png"
 SAVE_IMAGE = True
 
 # Total number of points to stipple your image with
-NUMBER_OF_POINTS = 1024
+#NUMBER_OF_POINTS = 1024
 #NUMBER_OF_POINTS = 2048
-#NUMBER_OF_POINTS = 3072
+NUMBER_OF_POINTS = 3072
 
 
 # Number of iterations for the algorithm to evenly spread out all the points. Increase if it looks like all the points haven't 'settled' after the last few iterations.

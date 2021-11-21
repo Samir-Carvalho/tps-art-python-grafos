@@ -16,9 +16,9 @@ from stippling import NUMBER_OF_POINTS
 #IMAGE_TSP = "images/smileyface-inverted-1024-stipple.tsp"
 
 ORIGINAL_IMAGE = "images/logo-ufla-png.png"
-IMAGE_TSP = "images/logo-ufla-png-1024-stipple.tsp"
+#IMAGE_TSP = "images/logo-ufla-png-1024-stipple.tsp"
 #IMAGE_TSP = "images/logo-ufla-png-2048-stipple.tsp"
-#IMAGE_TSP = "images/logo-ufla-png-3072-stipple.tsp"
+IMAGE_TSP = "images/logo-ufla-png-3072-stipple.tsp"
 
 def create_data_model():
     """Stores the data for the problem."""
@@ -115,7 +115,7 @@ def melhorandoArota(rota):
                 else:
                     proximoj = j + 1
                 trocar = dist(rota[i],rota[j]) + dist(rota[proximoi],rota[proximoj]) - dist(rota[i],rota[proximoi]) - dist(rota[j],rota[proximoj])
-                if trocar < 40:
+                if trocar < 0:
                     trocar_arestas(proximoi,j+1,rota)
                     melhorar += -1*trocar
         total_dist = total_dist + -1*melhorar
@@ -199,10 +199,10 @@ def main():
     #distance_matrix = compute_euclidean_distance_matrix(data['locations'])
     
     #(ii)
-    distance_matrix = tspVizinhoMaisProximo(data['locations'])
+    #distance_matrix = tspVizinhoMaisProximo(data['locations'])
     
     #(iii)
-    #distance_matrix = melhorandoArota(data['locations'])
+    distance_matrix = melhorandoArota(data['locations'])
 
     #######################################################################################
 
